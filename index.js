@@ -272,7 +272,11 @@ function delay(ms) {
 start();
 
 async function TeamsOfMatch(id) {
-  const browser = await puppeteer.launch({ headless: true });
+  const browser = await puppeteer.launch({
+    headless: true,
+
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+  });
   const page = await browser.newPage();
   await page.setViewport({ width: 1280, height: 1200 });
 
@@ -306,7 +310,10 @@ async function TeamsOfMatch(id) {
 
 async function scrape(id, team) {
   // console.log("hi", team);
-  const browser = await puppeteer.launch({ headless: true });
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+  });
   const page = await browser.newPage();
   await page.setViewport({ width: 1280, height: 1200 });
 
