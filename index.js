@@ -250,6 +250,7 @@ bot.on("callback_query", async (callbackQuery) => {
   lastProcessed.set(callbackId, now);
 
   try {
+    bot.sendMessage(chatId, "Ticket is Booking Now");
     // Process the callback query
     scrapeQueue.push({ chatId, parsedData });
   } catch (error) {
