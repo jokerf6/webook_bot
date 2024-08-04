@@ -235,9 +235,8 @@ export async function TeamsOfMatch(id) {
   try {
     browser = await puppeteer.launch(browserOptions);
     page = await browser.newPage();
-    await page.setViewport({ width: 1280, height: 1200 });
     await page.goto(`https://webook.com/en/events/${id}/book`);
-    await page.waitForSelector("button.bg-primary", { timeout: 10000 });
+    await page.waitForSelector("button.bg-primary", { timeout: 30000 });
     await page.click("button.bg-primary");
     await page.waitForSelector('input[name="email"]');
 
