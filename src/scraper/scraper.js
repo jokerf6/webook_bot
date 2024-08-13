@@ -20,12 +20,9 @@ export async function loginAndCheckSuccess(email, password) {
     page = await browser.newPage();
 
     await page.goto("https://webook.com/en/login");
-    console.log("hi1");
     await page.waitForSelector("button.bg-primary", { timeout: 10000 });
-    console.log("hi2");
 
     await page.click("button.bg-primary");
-    console.log("hi3");
 
     await page.waitForSelector('input[name="email"]');
 
