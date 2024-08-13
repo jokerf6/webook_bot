@@ -3,8 +3,6 @@ import { findColorPixel } from "./util.js";
 import { sendMessage, sendPhoto } from "../bot/bot.js";
 const browserOptions = {
   headless: true,
-  executablePath:
-    "/root/.cache/puppeteer/chrome/linux-127.0.6533.88/chrome-linux64/chrome", // Replace with the path to your Chrome installation
   args: ["--no-sandbox", "--disable-setuid-sandbox"],
 };
 
