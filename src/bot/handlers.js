@@ -1,4 +1,4 @@
-import { sendMessage, sendPhoto } from "./bot.js";
+import { sendMessage, sendMessageOption, sendPhoto } from "./bot.js";
 import async from "async";
 
 import {
@@ -7,6 +7,7 @@ import {
   readTeamsFromDB,
   readChatData,
   CheckMatches,
+  DeleteUser,
 } from "../database/queries.js";
 import {
   loginAndCheckSuccess,
