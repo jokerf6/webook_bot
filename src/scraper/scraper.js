@@ -3,9 +3,13 @@ import { findColorPixel } from "./util.js";
 import { sendMessage, sendPhoto } from "../bot/bot.js";
 const browserOptions = {
   headless: true,
-  browserWSEndpoint:
-    "ws://localhost:9222/devtools/browser/2677b9cb-13fb-4c96-80bb-a736617b5eb1",
-  args: ["--no-sandbox", "--disable-setuid-sandbox"],
+  executablePath: "/usr/bin/chromium-browser",
+  args: [
+    "--no-sandbox",
+    "--headless",
+    "--disable-gpu",
+    "--disable-dev-shm-usage",
+  ],
 };
 
 export async function loginAndCheckSuccess(email, password) {
