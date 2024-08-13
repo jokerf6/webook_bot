@@ -4,7 +4,7 @@ import { sendMessage, sendPhoto } from "../bot/bot.js";
 const browserOptions = {
   headless: true,
   browserWSEndpoint:
-    "ws://localhost:9222/devtools/browser/8d577a6ff728745e0a38568845f0cff42bb8c14e9f01609a801409bf70e1de00",
+    "ws://localhost:9222/devtools/browser/2677b9cb-13fb-4c96-80bb-a736617b5eb1",
   args: ["--no-sandbox", "--disable-setuid-sandbox"],
 };
 
