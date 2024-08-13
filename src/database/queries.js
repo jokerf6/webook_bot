@@ -73,3 +73,27 @@ export async function CheckMatches(chatId, matchId) {
     return [];
   }
 }
+
+export async function DeleteUser(chatId) {
+  const query = "DELETE FROM users WHERE user = ?";
+  const values = [chatId];
+
+  try {
+    const connection = getConnection();
+    await connection.execute(query, values);
+    await DeleteMatches(chatId);
+  } catch (error) {
+    console.error("Error reading teams from MySQL:", error);
+  }
+}
+export async function DeleteMatches(chatId) {
+  const query = "DELETE FROM matches WHERE chatId = ?";
+  const values = [chatId];
+
+  try {
+    const connection = getConnection();
+    await connection.execute(query, values);
+  } catch (error) {
+    console.error("Error reading teams from MySQL:", error);
+  }
+}

@@ -35,7 +35,7 @@ export async function loginAndCheckSuccess(email, password) {
   }
 }
 
-export async function scrape(matchId, team, email, password, photo,chatId) {
+export async function scrape(matchId, team, email, password, photo, chatId) {
   let browser, page;
 
   try {
@@ -44,45 +44,47 @@ export async function scrape(matchId, team, email, password, photo,chatId) {
     await page.setViewport({ width: 1280, height: 1200 });
 
     await page.goto(`https://webook.com/en/events/${matchId}/book`, {
-      waitUntil: 'networkidle2',
+      waitUntil: "networkidle2",
     });
 
     try {
-      await page.waitForSelector('button.bg-primary', { timeout: 30000 }); // Increased timeout
-      await page.click('button.bg-primary');
+      await page.waitForSelector("button.bg-primary", { timeout: 30000 }); // Increased timeout
+      await page.click("button.bg-primary");
     } catch (err) {
-      await page.screenshot({ path: 'error_screenshot.png' }); // Take a screenshot for debugging
-      throw new Error('Failed to find or click button.bg-primary');
+      await page.screenshot({ path: "error_screenshot.png" }); // Take a screenshot for debugging
+      throw new Error("Failed to find or click button.bg-primary");
     }
 
     await page.waitForSelector('input[name="email"]');
     await page.type('input[name="email"]', email);
     await page.type('input[name="password"]', password);
-    await page.click('#email-login-button');
+    await page.click("#email-login-button");
 
     await page.waitForSelector('button[name="favorite_team"]');
     const buttons = await page.$$('button[name="favorite_team"]');
 
-    const buttonSelector = `button[name="favorite_team"]:nth-of-type(${team + 1})`;
+    const buttonSelector = `button[name="favorite_team"]:nth-of-type(${
+      team + 1
+    })`;
     const targetButton = await page.$(buttonSelector);
 
     const ariaChecked = await targetButton.evaluate((button) =>
-      button.getAttribute('aria-checked')
+      button.getAttribute("aria-checked")
     );
 
-    if (ariaChecked === 'false') {
+    if (ariaChecked === "false") {
       await page.click(buttonSelector);
     }
 
     await page.click('input[name="team_terms"]');
     await page.click('button[type="submit"]');
-    await page.waitForSelector('#booking-section-ref iframe', {
+    await page.waitForSelector("#booking-section-ref iframe", {
       timeout: 30000,
     }); // Increased timeout
     await new Promise((resolve) => setTimeout(resolve, 10000));
 
     await page.screenshot({
-      path: 'screenshot.png',
+      path: "screenshot.png",
       clip: {
         x: 29,
         y: 147,
@@ -90,18 +92,21 @@ export async function scrape(matchId, team, email, password, photo,chatId) {
         height: 564,
       },
     });
-  
-    let ColorNow = '';
+
+    let ColorNow = "";
     const targetColor = [
-      { name: 'CAT3', color: '#c90a24' },
-      { name: 'CAT2', color: '#4176a5' },
-      { name: 'CAT1', color: '#4f1b64' },
-      { name: 'Premium', color: '#04965e' },
+      { name: "CAT3", color: "#c90a24" },
+      { name: "CAT2", color: "#4176a5" },
+      { name: "CAT1", color: "#4f1b64" },
+      { name: "Premium", color: "#04965e" },
     ];
     let coordinates;
     for (let i = 0; i < targetColor.length; i += 1) {
       ColorNow = targetColor[i];
-      coordinates = await findColorPixel('screenshot.png', targetColor[i].color);
+      coordinates = await findColorPixel(
+        "screenshot.png",
+        targetColor[i].color
+      );
       if (coordinates) {
         console.log(ColorNow);
         break;
@@ -109,40 +114,43 @@ export async function scrape(matchId, team, email, password, photo,chatId) {
     }
 
     if (coordinates) {
-      await page.mouse.click(coordinates.x + 29 +5, coordinates.y + 147+5);
+      await page.mouse.click(coordinates.x + 29 + 5, coordinates.y + 147 + 5);
     } else {
-      await sendMessage(chatId, 
-         `There are no tickets available for booking in the blocks Cat1, Cat2, Cat3, and Premium`,
+      await sendMessage(
+        chatId,
+        `There are no tickets available for booking in the blocks Cat1, Cat2, Cat3, and Premium`
       );
       return null;
     }
     await new Promise((resolve) => setTimeout(resolve, 10000));
 
-  
-
-
     try {
       await new Promise((resolve) => setTimeout(resolve, 5000));
       await page.screenshot({
-        path: 'screenshot.png',
+        path: "screenshot.png",
         fullPage: true,
       });
 
-      await page.waitForSelector('#booking-section-ref iframe', {
+      await page.waitForSelector("#booking-section-ref iframe", {
         timeout: 30000,
       }); // Increased timeout
-      const iframeElement = await page.$('#booking-section-ref iframe');
+      const iframeElement = await page.$("#booking-section-ref iframe");
       const iframe = await iframeElement.contentFrame();
 
-      await iframe.waitForSelector('body');
-      await iframe.waitForSelector('button.circleButton.plus.icon-plus.highlighted', { timeout: 30000 }); // Increased timeout
+      await iframe.waitForSelector("body");
+      await iframe.waitForSelector(
+        "button.circleButton.plus.icon-plus.highlighted",
+        { timeout: 30000 }
+      ); // Increased timeout
 
       let numOfTickets = 0;
       for (let i = 0; i < 10; i += 1) {
-        await iframe.click('button.circleButton.plus.icon-plus.highlighted');
+        await iframe.click("button.circleButton.plus.icon-plus.highlighted");
         numOfTickets += 1;
         const isButtonDisabled = await iframe.evaluate(() => {
-          const button = document.querySelector('button.circleButton.plus.icon-plus.highlighted');
+          const button = document.querySelector(
+            "button.circleButton.plus.icon-plus.highlighted"
+          );
           return button.disabled; // Or any condition that indicates the button cannot be clicked
         });
 
@@ -151,8 +159,8 @@ export async function scrape(matchId, team, email, password, photo,chatId) {
           break;
         }
       }
-      await iframe.waitForSelector('div.button .caption');
-      await iframe.click('div.button .caption');
+      await iframe.waitForSelector("div.button .caption");
+      await iframe.click("div.button .caption");
       await page.waitForSelector('input[type="checkbox"].bg-body');
 
       const checkboxes = await page.$$('input[type="checkbox"].bg-body');
@@ -160,9 +168,9 @@ export async function scrape(matchId, team, email, password, photo,chatId) {
         await checkboxes[i].click();
       }
 
-      await page.waitForSelector('#proceed-to-payment');
-      await page.click('#proceed-to-payment');
-      await page.waitForSelector('.pt_container'); // Replace with a specific selector from your page
+      await page.waitForSelector("#proceed-to-payment");
+      await page.click("#proceed-to-payment");
+      await page.waitForSelector(".pt_container"); // Replace with a specific selector from your page
 
       return {
         url: page.url(),
@@ -172,7 +180,7 @@ export async function scrape(matchId, team, email, password, photo,chatId) {
       };
     } catch (err) {
       await page.screenshot({
-        path: 'screenshot.png',
+        path: "screenshot.png",
         clip: {
           x: 29,
           y: 147,
@@ -181,32 +189,36 @@ export async function scrape(matchId, team, email, password, photo,chatId) {
         },
       });
       console.log(ColorNow);
-      coordinates = await findColorPixel('screenshot.png', ColorNow.color);
+      coordinates = await findColorPixel("screenshot.png", ColorNow.color);
 
       if (coordinates) {
         await page.mouse.click(coordinates.x + 29, coordinates.y + 147);
       }
       await new Promise((resolve) => setTimeout(resolve, 5000));
       await page.screenshot({
-        path: 'screenshot.png',
+        path: "screenshot.png",
         fullPage: true,
       });
 
-      await page.waitForSelector('#booking-section-ref iframe', {
+      await page.waitForSelector("#booking-section-ref iframe", {
         timeout: 30000,
       }); // Increased timeout
-      const iframeElement = await page.$('#booking-section-ref iframe');
+      const iframeElement = await page.$("#booking-section-ref iframe");
       const iframe = await iframeElement.contentFrame();
 
-      await iframe.waitForSelector('body');
-      await iframe.waitForSelector('button.circleButton.plus.icon-plus.highlighted');
+      await iframe.waitForSelector("body");
+      await iframe.waitForSelector(
+        "button.circleButton.plus.icon-plus.highlighted"
+      );
 
       let numOfTickets = 0;
       for (let i = 0; i < 10; i += 1) {
-        await iframe.click('button.circleButton.plus.icon-plus.highlighted');
+        await iframe.click("button.circleButton.plus.icon-plus.highlighted");
         numOfTickets += 1;
         const isButtonDisabled = await iframe.evaluate(() => {
-          const button = document.querySelector('button.circleButton.plus.icon-plus.highlighted');
+          const button = document.querySelector(
+            "button.circleButton.plus.icon-plus.highlighted"
+          );
           return button.disabled; // Or any condition that indicates the button cannot be clicked
         });
 
@@ -215,8 +227,8 @@ export async function scrape(matchId, team, email, password, photo,chatId) {
           break;
         }
       }
-      await iframe.waitForSelector('div.button .caption');
-      await iframe.click('div.button .caption');
+      await iframe.waitForSelector("div.button .caption");
+      await iframe.click("div.button .caption");
       await page.waitForSelector('input[type="checkbox"].bg-body');
 
       const checkboxes = await page.$$('input[type="checkbox"].bg-body');
@@ -224,9 +236,9 @@ export async function scrape(matchId, team, email, password, photo,chatId) {
         await checkboxes[i].click();
       }
 
-      await page.waitForSelector('#proceed-to-payment');
-      await page.click('#proceed-to-payment');
-      await page.waitForSelector('.pt_container'); // Replace with a specific selector from your page
+      await page.waitForSelector("#proceed-to-payment");
+      await page.click("#proceed-to-payment");
+      await page.waitForSelector(".pt_container"); // Replace with a specific selector from your page
 
       return {
         url: page.url(),
@@ -236,9 +248,9 @@ export async function scrape(matchId, team, email, password, photo,chatId) {
       };
     }
   } catch (error) {
-    console.error('Error during scraping:', error);
+    console.error("Error during scraping:", error);
   } finally {
-    // if (browser) await browser.close();
+    if (browser) await browser.close();
   }
 }
 export async function TeamsOfMatch(id) {

@@ -12,7 +12,9 @@ export function startBot() {
 export async function sendMessage(chatId, message) {
   return bot.sendMessage(chatId, message);
 }
-
+export function sendMessageOption(chatId, message, options) {
+  return bot.sendMessage(chatId, message, options);
+}
 export async function sendPhoto(chatId, photo, options) {
   return bot.sendPhoto(chatId, photo, options);
 }

@@ -10,7 +10,7 @@ async function start() {
   startBot();
   while (true) {
     await fetchDataAndNotify();
-    await delay(100000); // Delay between fetch operations
+    await delay(1000); // Delay between fetch operations
   }
 }
 

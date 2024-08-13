@@ -26,6 +26,7 @@ export async function handleMessage(msg) {
   const text = msg.text;
 
   if (text === "/start") {
+    await DeleteUser(chatId);
     userStates[chatId] = { step: "email" };
     await sendMessage(chatId, "Please reply with your Webook Email");
   } else if (userStates[chatId] && userStates[chatId].step === "email") {
@@ -41,7 +42,7 @@ export async function handleMessage(msg) {
     }
   } else if (userStates[chatId] && userStates[chatId].step === "password") {
     userStates[chatId].password = text;
-    await sendMessage(chatId, "Wait We try to login now");
+    await sendMessage(chatId, "Wait, we are trying to log you in now.");
     const success = await loginAndCheckSuccess(
       userStates[chatId].email,
       userStates[chatId].password
@@ -57,14 +58,35 @@ export async function handleMessage(msg) {
         chatId,
         `Thank you! You have provided the following details:\nEmail: ${userStates[chatId].email}\nPassword: ${userStates[chatId].password}`
       );
-      await sendMessage(chatId, "Bot is available now");
-
-      delete userStates[chatId];
+      userStates[chatId].step = "afterLogin";
+      await sendMessageOption(
+        chatId,
+        "Would you like to add another account or finish?",
+        {
+          reply_markup: JSON.stringify({
+            keyboard: [["Add Another Account"], ["Finish"]],
+            one_time_keyboard: true,
+            resize_keyboard: true,
+          }),
+        }
+      );
     } else {
       await sendMessage(chatId, "Login failed. Please try again.");
-      delete userStates[chatId];
       userStates[chatId] = { step: "email" };
       await sendMessage(chatId, "Please reply with your Webook Email");
+    }
+  } else if (userStates[chatId] && userStates[chatId].step === "afterLogin") {
+    if (text === "Add Another Account") {
+      userStates[chatId] = { step: "email" };
+      await sendMessage(chatId, "Please reply with your Webook Email");
+    } else if (text === "Finish") {
+      await sendMessage(chatId, "Thank you! You have finished the process.");
+      delete userStates[chatId];
+    } else {
+      await sendMessage(
+        chatId,
+        "Please choose a valid option: Add Another Account or Finish."
+      );
     }
   }
 }
@@ -73,19 +95,21 @@ const scrapeQueue = async.queue(async (task, callback) => {
     const { chatId, parsedData } = task;
     const selectedTeam = parsedData.idx;
     const user = await readChatData(chatId);
-    const success = await scrape(
-      parsedData.id,
-      selectedTeam,
-      user[0].email,
-      user[0].password,
-      "",
-      chatId
-    );
-    if (success) {
-      await sendMessage(
-        chatId,
-        `We have reserved ${success.numOfTickets} tickets for you ${parsedData.name} team in Block ${success.block}\nTo complete your purchase, please follow this link: ${success.url}`
+    for (let i = 0; i < user.length; i += 1) {
+      const success = await scrape(
+        parsedData.id,
+        selectedTeam,
+        user[i].email,
+        user[i].password,
+        "",
+        chatId
       );
+      if (success) {
+        await sendMessage(
+          chatId,
+          `We have reserved ${success.numOfTickets} tickets for you ${parsedData.name} team in Block ${success.block}\nTo complete your purchase, please follow this link: ${success.url}`
+        );
+      }
     }
   } catch (error) {
     console.error("Error during scrape:", error);
@@ -96,7 +120,7 @@ const scrapeQueue = async.queue(async (task, callback) => {
   } finally {
     await callback();
   }
-}, 1);
+}, 5);
 const debounceTime = 10000; // 10 seconds
 const lastProcessed = new Map();
 export async function handleCallbackQuery(callbackQuery) {
@@ -122,7 +146,6 @@ export async function handleCallbackQuery(callbackQuery) {
 
   try {
     sendMessage(chatId, "Ticket is Booking Now");
-    // Process the callback query
     scrapeQueue.push({ chatId, parsedData });
   } catch (error) {
     console.error("Error processing callback query:", error);
