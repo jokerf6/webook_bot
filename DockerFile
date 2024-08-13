@@ -1,0 +1,14 @@
+# Use an appropriate base image
+FROM zenika/alpine-chrome:latest
+
+# Install any additional packages if needed
+RUN apk add --no-cache \
+    # e.g., curl, bash, etc.
+    bash \
+    curl
+
+# Expose the port for the WebSocket Debugging
+EXPOSE 9222
+
+# Start Chromium with remote debugging enabled
+CMD ["chromium-browser", "--no-sandbox", "--remote-debugging-port=9222"]
