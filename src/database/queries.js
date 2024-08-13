@@ -1,17 +1,17 @@
 import { getConnection } from "./connection.js";
 
-const checkUserExists = async (chatId) => {
+const checkUserExists = async (email, password) => {
   const connection = getConnection();
 
   const [rows] = await connection.execute(
-    "SELECT 1 FROM users WHERE user = ?",
-    [chatId]
+    "SELECT 1 FROM users WHERE email = ? AND password = ?",
+    [email, password]
   );
   return rows.length > 0;
 };
 
 export async function insertTeam(chatId, email, password) {
-  if (await checkUserExists(chatId)) {
+  if (await checkUserExists(email, password)) {
     console.log(`User with chatId ${chatId} already exists.`);
     return;
   }
