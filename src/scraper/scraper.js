@@ -3,7 +3,8 @@ import { findColorPixel } from "./util.js";
 import { sendMessage, sendPhoto } from "../bot/bot.js";
 const browserOptions = {
   headless: true,
-  executablePath: "/usr/bin/chromium-browser", // Update this to the correct path
+  browserWSEndpoint:
+    "ws://localhost:9222/devtools/browser/8d577a6ff728745e0a38568845f0cff42bb8c14e9f01609a801409bf70e1de00",
   args: ["--no-sandbox", "--disable-setuid-sandbox"],
 };
 
