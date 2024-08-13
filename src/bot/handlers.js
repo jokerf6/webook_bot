@@ -78,7 +78,8 @@ const scrapeQueue = async.queue(async (task, callback) => {
       selectedTeam,
       user[0].email,
       user[0].password,
-      ""
+      "",
+      chatId
     );
     if (success) {
       await sendMessage(

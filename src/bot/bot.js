@@ -9,10 +9,10 @@ export function startBot() {
   bot.on("callback_query", handleCallbackQuery);
 }
 
-export function sendMessage(chatId, message) {
+export async function sendMessage(chatId, message) {
   return bot.sendMessage(chatId, message);
 }
 
-export function sendPhoto(chatId, photo, options) {
+export async function sendPhoto(chatId, photo, options) {
   return bot.sendPhoto(chatId, photo, options);
 }

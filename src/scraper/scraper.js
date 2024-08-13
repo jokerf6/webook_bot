@@ -1,6 +1,6 @@
 import puppeteer from "puppeteer";
 import { findColorPixel } from "./util.js";
-
+import { sendMessage, sendPhoto } from "../bot/bot.js";
 const browserOptions = {
   headless: true,
   args: ["--no-sandbox", "--disable-setuid-sandbox"],
@@ -35,7 +35,7 @@ export async function loginAndCheckSuccess(email, password) {
   }
 }
 
-export async function scrape(matchId, team, email, password, photo) {
+export async function scrape(matchId, team, email, password, photo,chatId) {
   let browser, page;
 
   try {
@@ -90,7 +90,7 @@ export async function scrape(matchId, team, email, password, photo) {
         height: 564,
       },
     });
-
+  
     let ColorNow = '';
     const targetColor = [
       { name: 'CAT3', color: '#c90a24' },
@@ -109,131 +109,132 @@ export async function scrape(matchId, team, email, password, photo) {
     }
 
     if (coordinates) {
-      await page.mouse.click(coordinates.x + 29, coordinates.y + 147);
+      await page.mouse.click(coordinates.x + 29 +5, coordinates.y + 147+5);
     } else {
-      await sendphoto(chatId, photo, {
-        caption: `There are no tickets available for booking in the blocks Cat1, Cat2, Cat3, and Premium`,
-      });
+      await sendMessage(chatId, 
+         `There are no tickets available for booking in the blocks Cat1, Cat2, Cat3, and Premium`,
+      );
       return null;
     }
     await new Promise((resolve) => setTimeout(resolve, 10000));
 
-   console.log(coordinates);
-  console.log("taken")
-    // try {
-    //   await new Promise((resolve) => setTimeout(resolve, 5000));
-    //   await page.screenshot({
-    //     path: 'screenshot.png',
-    //     fullPage: true,
-    //   });
+  
 
-    //   await page.waitForSelector('#booking-section-ref iframe', {
-    //     timeout: 30000,
-    //   }); // Increased timeout
-    //   const iframeElement = await page.$('#booking-section-ref iframe');
-    //   const iframe = await iframeElement.contentFrame();
 
-    //   await iframe.waitForSelector('body');
-    //   await iframe.waitForSelector('button.circleButton.plus.icon-plus.highlighted', { timeout: 30000 }); // Increased timeout
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+      await page.screenshot({
+        path: 'screenshot.png',
+        fullPage: true,
+      });
 
-    //   let numOfTickets = 0;
-    //   for (let i = 0; i < 10; i += 1) {
-    //     await iframe.click('button.circleButton.plus.icon-plus.highlighted');
-    //     numOfTickets += 1;
-    //     const isButtonDisabled = await iframe.evaluate(() => {
-    //       const button = document.querySelector('button.circleButton.plus.icon-plus.highlighted');
-    //       return button.disabled; // Or any condition that indicates the button cannot be clicked
-    //     });
+      await page.waitForSelector('#booking-section-ref iframe', {
+        timeout: 30000,
+      }); // Increased timeout
+      const iframeElement = await page.$('#booking-section-ref iframe');
+      const iframe = await iframeElement.contentFrame();
 
-    //     // If the button is disabled, break out of the loop
-    //     if (isButtonDisabled) {
-    //       break;
-    //     }
-    //   }
-    //   await iframe.waitForSelector('div.button .caption');
-    //   await iframe.click('div.button .caption');
-    //   await page.waitForSelector('input[type="checkbox"].bg-body');
+      await iframe.waitForSelector('body');
+      await iframe.waitForSelector('button.circleButton.plus.icon-plus.highlighted', { timeout: 30000 }); // Increased timeout
 
-    //   const checkboxes = await page.$$('input[type="checkbox"].bg-body');
-    //   for (let i = 0; i < 2; i++) {
-    //     await checkboxes[i].click();
-    //   }
+      let numOfTickets = 0;
+      for (let i = 0; i < 10; i += 1) {
+        await iframe.click('button.circleButton.plus.icon-plus.highlighted');
+        numOfTickets += 1;
+        const isButtonDisabled = await iframe.evaluate(() => {
+          const button = document.querySelector('button.circleButton.plus.icon-plus.highlighted');
+          return button.disabled; // Or any condition that indicates the button cannot be clicked
+        });
 
-    //   await page.waitForSelector('#proceed-to-payment');
-    //   await page.click('#proceed-to-payment');
-    //   await page.waitForSelector('.pt_container'); // Replace with a specific selector from your page
+        // If the button is disabled, break out of the loop
+        if (isButtonDisabled) {
+          break;
+        }
+      }
+      await iframe.waitForSelector('div.button .caption');
+      await iframe.click('div.button .caption');
+      await page.waitForSelector('input[type="checkbox"].bg-body');
 
-    //   return {
-    //     url: page.url(),
-    //     block: ColorNow.name,
-    //     photo,
-    //     numOfTickets,
-    //   };
-    // } catch (err) {
-    //   await page.screenshot({
-    //     path: 'screenshot.png',
-    //     clip: {
-    //       x: 29,
-    //       y: 147,
-    //       width: 759,
-    //       height: 564,
-    //     },
-    //   });
-    //   console.log(ColorNow);
-    //   coordinates = await findColorPixel('screenshot.png', ColorNow.color);
+      const checkboxes = await page.$$('input[type="checkbox"].bg-body');
+      for (let i = 0; i < 2; i++) {
+        await checkboxes[i].click();
+      }
 
-    //   if (coordinates) {
-    //     await page.mouse.click(coordinates.x + 29, coordinates.y + 147);
-    //   }
-    //   await new Promise((resolve) => setTimeout(resolve, 5000));
-    //   await page.screenshot({
-    //     path: 'screenshot.png',
-    //     fullPage: true,
-    //   });
+      await page.waitForSelector('#proceed-to-payment');
+      await page.click('#proceed-to-payment');
+      await page.waitForSelector('.pt_container'); // Replace with a specific selector from your page
 
-    //   await page.waitForSelector('#booking-section-ref iframe', {
-    //     timeout: 30000,
-    //   }); // Increased timeout
-    //   const iframeElement = await page.$('#booking-section-ref iframe');
-    //   const iframe = await iframeElement.contentFrame();
+      return {
+        url: page.url(),
+        block: ColorNow.name,
+        photo,
+        numOfTickets,
+      };
+    } catch (err) {
+      await page.screenshot({
+        path: 'screenshot.png',
+        clip: {
+          x: 29,
+          y: 147,
+          width: 759,
+          height: 564,
+        },
+      });
+      console.log(ColorNow);
+      coordinates = await findColorPixel('screenshot.png', ColorNow.color);
 
-    //   await iframe.waitForSelector('body');
-    //   await iframe.waitForSelector('button.circleButton.plus.icon-plus.highlighted');
+      if (coordinates) {
+        await page.mouse.click(coordinates.x + 29, coordinates.y + 147);
+      }
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+      await page.screenshot({
+        path: 'screenshot.png',
+        fullPage: true,
+      });
 
-    //   let numOfTickets = 0;
-    //   for (let i = 0; i < 10; i += 1) {
-    //     await iframe.click('button.circleButton.plus.icon-plus.highlighted');
-    //     numOfTickets += 1;
-    //     const isButtonDisabled = await iframe.evaluate(() => {
-    //       const button = document.querySelector('button.circleButton.plus.icon-plus.highlighted');
-    //       return button.disabled; // Or any condition that indicates the button cannot be clicked
-    //     });
+      await page.waitForSelector('#booking-section-ref iframe', {
+        timeout: 30000,
+      }); // Increased timeout
+      const iframeElement = await page.$('#booking-section-ref iframe');
+      const iframe = await iframeElement.contentFrame();
 
-    //     // If the button is disabled, break out of the loop
-    //     if (isButtonDisabled) {
-    //       break;
-    //     }
-    //   }
-    //   await iframe.waitForSelector('div.button .caption');
-    //   await iframe.click('div.button .caption');
-    //   await page.waitForSelector('input[type="checkbox"].bg-body');
+      await iframe.waitForSelector('body');
+      await iframe.waitForSelector('button.circleButton.plus.icon-plus.highlighted');
 
-    //   const checkboxes = await page.$$('input[type="checkbox"].bg-body');
-    //   for (let i = 0; i < 2; i++) {
-    //     await checkboxes[i].click();
-    //   }
+      let numOfTickets = 0;
+      for (let i = 0; i < 10; i += 1) {
+        await iframe.click('button.circleButton.plus.icon-plus.highlighted');
+        numOfTickets += 1;
+        const isButtonDisabled = await iframe.evaluate(() => {
+          const button = document.querySelector('button.circleButton.plus.icon-plus.highlighted');
+          return button.disabled; // Or any condition that indicates the button cannot be clicked
+        });
 
-    //   await page.waitForSelector('#proceed-to-payment');
-    //   await page.click('#proceed-to-payment');
-    //   await page.waitForSelector('.pt_container'); // Replace with a specific selector from your page
+        // If the button is disabled, break out of the loop
+        if (isButtonDisabled) {
+          break;
+        }
+      }
+      await iframe.waitForSelector('div.button .caption');
+      await iframe.click('div.button .caption');
+      await page.waitForSelector('input[type="checkbox"].bg-body');
 
-    //   return {
-    //     url: page.url(),
-    //     block: ColorNow.name,
-    //     photo,
-    //     numOfTickets,
-    //   };
-    // }
+      const checkboxes = await page.$$('input[type="checkbox"].bg-body');
+      for (let i = 0; i < 2; i++) {
+        await checkboxes[i].click();
+      }
+
+      await page.waitForSelector('#proceed-to-payment');
+      await page.click('#proceed-to-payment');
+      await page.waitForSelector('.pt_container'); // Replace with a specific selector from your page
+
+      return {
+        url: page.url(),
+        block: ColorNow.name,
+        photo,
+        numOfTickets,
+      };
+    }
   } catch (error) {
     console.error('Error during scraping:', error);
   } finally {
