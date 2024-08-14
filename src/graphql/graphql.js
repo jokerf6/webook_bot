@@ -17,6 +17,7 @@ const combinedQuery = `
         id
         title
         ticketingUrlSlug
+        buttonLabel
         image31 {
           url
         }
@@ -34,27 +35,8 @@ const variables = {
   skip: 0,
   whereEvent: {
     visibility_not: "private",
-    AND: [
-      {
-        OR: [
-          { title_contains: "Football" },
-          { description_contains: "Football" },
-          { category: { title_contains: "Football" } },
-          { location: { title_contains: "Football" } },
-          { zone: { title_contains: "Football" } },
-          {
-            seo: {
-              OR: [
-                { title_contains: "Football" },
-                { keywords_contains: "Football" },
-                { description_contains: "Football" },
-              ],
-            },
-          },
-        ],
-      },
-      { ticketingUrlSlug_contains: "vs" },
-    ],
+    buttonLabel: "Book Tickets",
+    title_contains: "Saudi Super Cup",
   },
   orderEvent: ["order_ASC", "sys_publishedAt_DESC"],
 };

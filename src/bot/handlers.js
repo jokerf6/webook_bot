@@ -176,7 +176,7 @@ const getTeamsInlineKeyboard = (allTeams, photo) => ({
 
 // Function to handle individual match notification
 async function handleMatch(chatId, item) {
-  const matchId = item.id;
+  const matchId = item.ticketingUrlSlug;
 
   try {
     const matchStatus = await CheckMatches(chatId, matchId);
