@@ -36,7 +36,10 @@ const variables = {
   whereEvent: {
     visibility_not: "private",
     buttonLabel: "Book Tickets",
-    title_contains: "Saudi Super Cup",
+    OR: [
+      { title_contains: "Saudi Super Cup" },
+      { title_contains: "Roshn Saudi League" },
+    ],
   },
   orderEvent: ["order_ASC", "sys_publishedAt_DESC"],
 };
@@ -60,12 +63,7 @@ export async function fetchDataAndNotify() {
     const events = data.data.eventCollection.items;
 
     for (const team of teams) {
-      await sendMatchNotifications(
-        events,
-        team.user,
-        team.email,
-        team.password
-      );
+      await sendMatchNotifications(events, team.user);
     }
   } catch (error) {
     console.error("Error fetching data:");

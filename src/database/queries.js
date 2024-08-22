@@ -10,13 +10,24 @@ const checkUserExists = async (email, password) => {
   return rows.length > 0;
 };
 
-export async function insertTeam(chatId, email, password) {
-  if (await checkUserExists(email, password)) {
-    console.log(`User with chatId ${chatId} already exists.`);
-    return;
-  }
-  const query = "INSERT INTO users (user, email, password) VALUES (?, ?, ?)";
-  const values = [chatId, email, password];
+// export async function insertTeam(chatId, email, password) {
+//   if (await checkUserExists(email, password)) {
+//     console.log(`User with chatId ${chatId} already exists.`);
+//     return;
+//   }
+//   const query = "INSERT INTO users (user, email, password) VALUES (?, ?, ?)";
+//   const values = [chatId, email, password];
+//   try {
+//     const connection = getConnection();
+//     await connection.execute(query, values);
+//   } catch (error) {
+//     console.error("Error inserting team into MySQL:", error);
+//   }
+// }
+
+export async function insertTeam(chatId) {
+  const query = "INSERT INTO users (user) VALUES (?)";
+  const values = [chatId];
   try {
     const connection = getConnection();
     await connection.execute(query, values);
@@ -24,7 +35,6 @@ export async function insertTeam(chatId, email, password) {
     console.error("Error inserting team into MySQL:", error);
   }
 }
-
 export async function insertMatch(chatId, matchId) {
   const query = "INSERT INTO matches (chatId, matchId) VALUES (?, ?)";
   const values = [chatId, matchId];

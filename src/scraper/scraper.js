@@ -3,7 +3,7 @@ import { findColorPixel } from "./util.js";
 import { sendMessage, sendPhoto } from "../bot/bot.js";
 const browserOptions = {
   headless: true,
-  executablePath: "/usr/bin/chromium-browser",
+  // executablePath: "/usr/bin/chromium-browser",
   args: [
     "--no-sandbox",
     "--headless",

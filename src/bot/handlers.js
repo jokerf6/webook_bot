@@ -28,67 +28,66 @@ export async function handleMessage(msg) {
 
   if (text === "/start") {
     await DeleteUser(chatId);
-    userStates[chatId] = { step: "email" };
-    await sendMessage(chatId, "Please reply with your Webook Email");
-  } else if (userStates[chatId] && userStates[chatId].step === "email") {
-    if (isValidEmail(text)) {
-      userStates[chatId].email = text;
-      userStates[chatId].step = "password";
-      await sendMessage(chatId, "Please reply with your Webook Password");
-    } else {
-      await sendMessage(
-        chatId,
-        "Invalid email address. Please enter a valid Webook Email."
-      );
-    }
-  } else if (userStates[chatId] && userStates[chatId].step === "password") {
-    userStates[chatId].password = text;
-    await sendMessage(chatId, "Wait, we are trying to log you in now.");
-    const success = await loginAndCheckSuccess(
-      userStates[chatId].email,
-      userStates[chatId].password
-    );
+    await insertTeam(chatId);
+    await sendMessage(chatId, `Thank you!`);
+  }
+  // await sendMessage(chatId, "Please reply with your Webook Email");
+  // } else if (userStates[chatId] && userStates[chatId].step === "email") {
+  //   if (isValidEmail(text)) {
+  //     userStates[chatId].email = text;
+  //     userStates[chatId].step = "password";
+  //     await sendMessage(chatId, "Please reply with your Webook Password");
+  //   } else {
+  //     await sendMessage(
+  //       chatId,
+  //       "Invalid email address. Please enter a valid Webook Email."
+  //     );
+  //   }
+  // } else if (userStates[chatId] && userStates[chatId].step === "password") {
+  //   userStates[chatId].password = text;
+  //   await sendMessage(chatId, "Wait, we are trying to log you in now.");
+  //   const success = await loginAndCheckSuccess(
+  //     userStates[chatId].email,
+  //     userStates[chatId].password
+  //   );
 
-    if (success) {
-      await insertTeam(
-        chatId,
-        userStates[chatId].email,
-        userStates[chatId].password
-      );
-      await sendMessage(
-        chatId,
-        `Thank you! You have provided the following details:\nEmail: ${userStates[chatId].email}\nPassword: ${userStates[chatId].password}`
-      );
-      userStates[chatId].step = "afterLogin";
-      await sendMessageOption(
-        chatId,
-        "Would you like to add another account or finish?",
-        {
-          reply_markup: JSON.stringify({
-            keyboard: [["Add Another Account"], ["Finish"]],
-            one_time_keyboard: true,
-            resize_keyboard: true,
-          }),
-        }
-      );
-    } else {
-      await sendMessage(chatId, "Login failed. Please try again.");
-      userStates[chatId] = { step: "email" };
-      await sendMessage(chatId, "Please reply with your Webook Email");
-    }
-  } else if (userStates[chatId] && userStates[chatId].step === "afterLogin") {
-    if (text === "Add Another Account") {
-      userStates[chatId] = { step: "email" };
-      await sendMessage(chatId, "Please reply with your Webook Email");
-    } else if (text === "Finish") {
-      await sendMessage(chatId, "Thank you! You have finished the process.");
-      delete userStates[chatId];
-    } else {
-      await sendMessage(
-        chatId,
-        "Please choose a valid option: Add Another Account or Finish."
-      );
-    }
+  //   if (success) {
+  //     await insertTeam(
+  //       chatId,
+  //       userStates[chatId].email,
+  //       userStates[chatId].password
+  //     );
+  //     await sendMessage(
+  //       chatId,
+  //       `Thank you! You have provided the following details:\nEmail: ${userStates[chatId].email}\nPassword: ${userStates[chatId].password}`
+  //     );
+  //     userStates[chatId].step = "afterLogin";
+  //     await sendMessageOption(
+  //       chatId,
+  //       "Would you like to add another account or finish?",
+  //       {
+  //         reply_markup: JSON.stringify({
+  //           keyboard: [["Add Another Account"], ["Finish"]],
+  //           one_time_keyboard: true,
+  //           resize_keyboard: true,
+  //         }),
+  //       }
+  //     );
+  //   } else {
+  //     await sendMessage(chatId, "Login failed. Please try again.");
+  //     userStates[chatId] = { step: "email" };
+  //     await sendMessage(chatId, "Please reply with your Webook Email");
+  //   }
+  // } else if (userStates[chatId] && userStates[chatId].step === "afterLogin") {
+  //   if (text === "Add Another Account") {
+  //     userStates[chatId] = { step: "email" };
+  //     await sendMessage(chatId, "Please reply with your Webook Email");
+  //   } else if (text === "Finish") {
+  //     await sendMessage(chatId, "Thank you! You have finished the process.");
+  //     delete userStates[chatId];
+  //   }
+  else {
+    await sendMessage(chatId, "Please choose a valid option");
   }
 }
 const scrapeQueue = async.queue(async (task, callback) => {
@@ -153,7 +152,7 @@ export async function handleCallbackQuery(callbackQuery) {
   }
 }
 
-export async function sendMatchNotifications(events, chatId, email, password) {
+export async function sendMatchNotifications(events, chatId) {
   for (const event of events) {
     await handleMatch(chatId, event);
   }
@@ -181,12 +180,12 @@ async function handleMatch(chatId, item) {
   try {
     const matchStatus = await CheckMatches(chatId, matchId);
     if (matchStatus.length === 0) {
-      const teams = await TeamsOfMatch(item.ticketingUrlSlug);
+      // const teams = await TeamsOfMatch(item.ticketingUrlSlug);
       const imageUrl = item.image31?.url || item.image11?.url;
       if (imageUrl) {
         await sendPhoto(chatId, imageUrl, {
-          caption: `Tickets for ${item.title} are available on the website now. Please reply with your favorite team.`,
-          ...getTeamsInlineKeyboard(teams),
+          caption: `Tickets for ${item.title} are available on the website now. You can boot it from here https://webook.com/en/events/${item.ticketingUrlSlug}/book`,
+          // ...getTeamsInlineKeyboard(teams),
         });
       }
       await insertMatch(chatId, matchId);
