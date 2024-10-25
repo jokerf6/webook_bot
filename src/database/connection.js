@@ -1,18 +1,22 @@
-import mysql from "mysql2/promise";
-import { dbConfig } from "../config/config.js";
+import { MongoClient } from "mongodb";
 
-let connection;
+let client;
+let db;
 
 export async function connectToDatabase() {
   try {
-    connection = await mysql.createConnection(dbConfig);
-    console.log("Connected to MySQL database...");
+    client = new MongoClient(
+      "mongodb+srv://fahd:fahd@cluster0.gchoxor.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+    );
+    await client.connect();
+    db = client.db("test");
+    console.log("Connected to MongoDB database...");
   } catch (error) {
-    console.error("Error connecting to MySQL database:", error);
+    console.error("Error connecting to MongoDB database:", error);
     process.exit(1); // Exit the process on connection error
   }
 }
 
-export function getConnection() {
-  return connection;
+export function getDb() {
+  return db;
 }

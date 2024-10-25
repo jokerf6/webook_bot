@@ -8,8 +8,10 @@ import {
   readChatData,
   CheckMatches,
   DeleteUser,
+  checkNumber,
 } from "../database/queries.js";
 import {
+  getTickets,
   loginAndCheckSuccess,
   scrape,
   TeamsOfMatch,
@@ -27,9 +29,29 @@ export async function handleMessage(msg) {
   const text = msg.text;
 
   if (text === "/start") {
-    await DeleteUser(chatId);
-    await insertTeam(chatId);
-    await sendMessage(chatId, `Thank you!`);
+    await sendMessage(chatId, `Please replay with your phone!`);
+  } else if (/^\+?[0-9]\d{7,14}$/.test(text) && (await checkNumber(text))) {
+    try {
+      await DeleteUser(chatId);
+      await insertTeam(chatId, text);
+      await sendMessage(
+        chatId,
+        `Thank you! Your phone number has been registered.`
+      );
+    } catch (error) {
+      console.error("Error processing phone number:", error);
+      await sendMessage(
+        chatId,
+        `Sorry, there was an error processing your request. Please try again later.`
+      );
+    }
+  } else if (!(await checkNumber(text))) {
+    await sendMessage(chatId, `Please use a different number.`);
+  } else {
+    await sendMessage(
+      chatId,
+      `Please enter a valid phone number starting with + and containing 8 to 15 digits. `
+    );
   }
   // await sendMessage(chatId, "Please reply with your Webook Email");
   // } else if (userStates[chatId] && userStates[chatId].step === "email") {
@@ -86,9 +108,6 @@ export async function handleMessage(msg) {
   //     await sendMessage(chatId, "Thank you! You have finished the process.");
   //     delete userStates[chatId];
   //   }
-  else {
-    await sendMessage(chatId, "Please choose a valid option");
-  }
 }
 const scrapeQueue = async.queue(async (task, callback) => {
   try {
@@ -155,6 +174,7 @@ export async function handleCallbackQuery(callbackQuery) {
 export async function sendMatchNotifications(events, chatId) {
   for (const event of events) {
     await handleMatch(chatId, event);
+    // await getTickets(chatId, event.ticketingUrlSlug, event);
   }
 }
 

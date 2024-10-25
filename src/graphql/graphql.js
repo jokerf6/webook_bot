@@ -2,6 +2,7 @@ import fetch from "node-fetch";
 import { contentfulConfig } from "../config/config.js";
 import { readTeamsFromDB } from "../database/queries.js";
 import { sendMatchNotifications } from "../bot/handlers.js";
+import { getTickets } from "../scraper/scraper.js";
 
 const combinedQuery = `
   query getCombinedData(
@@ -38,6 +39,7 @@ const variables = {
     buttonLabel: "Book Tickets",
     OR: [
       { title_contains: "Saudi Super Cup" },
+      { title_contains: "AFC Asian Qualifiers" },
       { title_contains: "Roshn Saudi League" },
     ],
   },

@@ -36,9 +36,9 @@ export async function findColorPixel(imagePath, targetColor) {
     const y = Math.floor(i / 4 / image.width);
 
     if (isColorMatch(r, g, b)) {
-      return { x, y };
+      return true;
     }
   }
 
-  return null;
+  return false;
 }

@@ -1,109 +1,104 @@
-import { getConnection } from "./connection.js";
+// Assume we have a MongoDB connection and models set up
+import { User, Match, Number } from "./models.js";
+import { connectToDatabase, getDb } from "./connection.js";
 
-const checkUserExists = async (email, password) => {
-  const connection = getConnection();
+// ... existing code ...
 
-  const [rows] = await connection.execute(
-    "SELECT 1 FROM users WHERE email = ? AND password = ?",
-    [email, password]
-  );
-  return rows.length > 0;
-};
-
-// export async function insertTeam(chatId, email, password) {
-//   if (await checkUserExists(email, password)) {
-//     console.log(`User with chatId ${chatId} already exists.`);
-//     return;
-//   }
-//   const query = "INSERT INTO users (user, email, password) VALUES (?, ?, ?)";
-//   const values = [chatId, email, password];
-//   try {
-//     const connection = getConnection();
-//     await connection.execute(query, values);
-//   } catch (error) {
-//     console.error("Error inserting team into MySQL:", error);
-//   }
-// }
-
-export async function insertTeam(chatId) {
-  const query = "INSERT INTO users (user) VALUES (?)";
-  const values = [chatId];
+export async function insertTeam(chatId, number) {
   try {
-    const connection = getConnection();
-    await connection.execute(query, values);
+    const db = await getDb();
+    await db.collection("users").insertOne({ user: chatId, number });
   } catch (error) {
-    console.error("Error inserting team into MySQL:", error);
+    console.error("Error inserting team into MongoDB:", error);
   }
 }
+
 export async function insertMatch(chatId, matchId) {
-  const query = "INSERT INTO matches (chatId, matchId) VALUES (?, ?)";
-  const values = [chatId, matchId];
   try {
-    const connection = getConnection();
-    await connection.execute(query, values);
+    const db = await getDb();
+    await db.collection("matches").insertOne({ chatId, matchId });
     console.log(`Inserted match with chatId ${chatId} and matchId ${matchId}`);
   } catch (error) {
-    console.error("Error inserting data into MySQL:", error);
+    console.error("Error inserting data into MongoDB:", error);
   }
 }
-
 export async function readTeamsFromDB() {
-  const query = "SELECT * FROM users";
   try {
-    const connection = getConnection();
-    const [rows] = await connection.execute(query);
-    return rows;
+    // Add a timeout option of 30 seconds (30000 ms)
+    const db = await getDb();
+    const teams = await await db.collection("users").find({}).toArray();
+    return teams;
   } catch (error) {
-    console.error("Error reading teams from MySQL:", error);
+    if (
+      error.name === "MongooseError" &&
+      error.message.includes("buffering timed out")
+    ) {
+      console.error(
+        "MongoDB operation timed out. Please check your database connection."
+      );
+    } else {
+      console.error("Error reading teams from MongoDB:", error);
+    }
     return [];
   }
 }
-export async function readChatData(chatId) {
-  const query = "SELECT * FROM users WHERE user = ?";
-  const values = [chatId];
 
+export async function readChatData(chatId) {
   try {
-    const connection = getConnection();
-    const [rows] = await connection.execute(query, values);
-    return rows;
+    const db = await getDb();
+    const teams = await db.collection("users").find({ user: chatId }).toArray();
+    return teams;
   } catch (error) {
-    console.error("Error reading teams from MySQL:", error);
+    console.error("Error reading teams from MongoDB:", error);
     return [];
   }
 }
-export async function CheckMatches(chatId, matchId) {
-  const query = "SELECT * FROM matches WHERE chatId = ? AND matchId = ?";
-  const values = [chatId, matchId];
+
+export async function checkNumber(number) {
   try {
-    const connection = getConnection();
-    const [rows] = await connection.execute(query, values);
-    return rows;
+    const db = await getDb();
+    const result = await db.collection("numbers").find({ number }).toArray();
+    return result.length > 0 ? true : false;
   } catch (error) {
-    console.error("Error reading teams from MySQL:", error);
+    console.error("Error reading teams from MongoDB:", error);
+    return false;
+  }
+}
+
+export async function CheckMatches(chatId, matchId) {
+  try {
+    const db = await getDb();
+    const result = await db
+      .collection("matches")
+      .find({ chatId, matchId })
+      .toArray();
+    return result;
+  } catch (error) {
+    console.error("Error reading teams from MongoDB:", error);
     return [];
   }
 }
 
 export async function DeleteUser(chatId) {
-  const query = "DELETE FROM users WHERE user = ?";
-  const values = [chatId];
-
   try {
-    const connection = getConnection();
-    await connection.execute(query, values);
+    const db = await getDb();
+    await db.collection("users").deleteOne({ user: chatId });
     await DeleteMatches(chatId);
   } catch (error) {
-    console.error("Error reading teams from MySQL:", error);
+    console.error("Error deleting user from MongoDB:", error);
   }
 }
-export async function DeleteMatches(chatId) {
-  const query = "DELETE FROM matches WHERE chatId = ?";
-  const values = [chatId];
 
+export async function DeleteMatches(chatId) {
   try {
-    const connection = getConnection();
-    await connection.execute(query, values);
+    const db = await getDb();
+    await db.collection("matches").deleteMany({ chatId });
   } catch (error) {
-    console.error("Error reading teams from MySQL:", error);
+    console.error("Error deleting matches from MongoDB:", error);
   }
+}
+
+export async function Check() {
+  const teams = await readTeamsFromDB();
+  const matches = await readMatchesFromDB();
 }
