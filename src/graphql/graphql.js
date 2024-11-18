@@ -69,5 +69,6 @@ export async function fetchDataAndNotify() {
     }
   } catch (error) {
     console.error("Error fetching data:");
+    console.error(error);
   }
 }
