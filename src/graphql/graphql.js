@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import { contentfulConfig } from "../config/config.js";
 import { readTeamsFromDB } from "../database/queries.js";
 import { sendMatchNotifications } from "../bot/handlers.js";
