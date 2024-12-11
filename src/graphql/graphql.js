@@ -47,6 +47,7 @@ const variables = {
 };
 
 export async function fetchDataAndNotify() {
+  console.log(process.env.CONTENTFUL_ACCESS_TOKEN);
   const payload = {
     method: "POST",
     headers: {
