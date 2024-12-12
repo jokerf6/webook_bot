@@ -9,7 +9,7 @@ async function start() {
   await connectToDatabase();
   startBot();
   while (true) {
-    
+    console.log("start");
     await fetchDataAndNotify();
     await delay(10000); // Delay between fetch operations
   }
