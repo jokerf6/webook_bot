@@ -5,6 +5,7 @@ import { handleMessage, handleCallbackQuery } from "./handlers.js";
 const bot = new TelegramBot(telegramConfig.token, { polling: true });
 
 export function startBot() {
+  console.log("hi")
   bot.on("message", handleMessage);
   bot.on("callback_query", handleCallbackQuery);
 }
